@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -10,9 +11,13 @@ use Inertia\Inertia;
 class PageController extends Controller
 {
     public function home()
-{
-    return Inertia::render('Home');
-}
+    {
+        return Inertia::render('Home', [
+            'featuredBooks' => Book::latest()->take(4)->get()
+                ->map(fn ($book) => $this->enrich($book))
+                ->values(),
+        ]);
+    }
 
     public function about()
     {
@@ -21,11 +26,13 @@ class PageController extends Controller
 
     public function catalog(Request $request)
     {
-        $query = $request->input('q', 'bestsellers');
+        $query = $request->input('q');
+
+        $books = Book::when($query, fn ($q) => $q->where('title', 'like', "%{$query}%"))->get();
 
         return Inertia::render('Catalog', [
-            'books' => $this->fetchBooks($query, 20),
-            'query' => $query,
+            'books' => $books->map(fn ($book) => $this->enrich($book))->values(),
+            'query' => $query ?? '',
         ]);
     }
 
@@ -34,49 +41,47 @@ class PageController extends Controller
         return Inertia::render('Contact');
     }
 
-    public function submitContact(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'message' => 'required|string|max:2000',
-        ]);
-
-        // TODO: send email or store in DB
-        // Mail::to('hello@bookish.com')->send(new ContactMessage($validated));
-
-        return back()->with('success', 'Thanks for reaching out! We\'ll get back to you soon.');
-    }
-
-    private function fetchBooks(string $query, int $limit): array
+private function enrich(Book $book): array
 {
-    $cacheKey = "books:google:{$query}:{$limit}";
+    $info = Cache::remember("book-info:{$book->title}", now()->addWeek(), function () use ($book) {
+        $response = Http::withOptions(['verify' => false])
+            ->withHeaders(['User-Agent' => 'Bookish Bookstore (contact@bookish.test)'])
+            ->get('https://openlibrary.org/search.json', [
+                'q' => $book->title,
+                'limit' => 1,
+                'fields' => 'author_name,key',
+            ]);
 
-    return Cache::remember($cacheKey, now()->addHours(6), function () use ($query, $limit) {
-        $response = Http::get('https://www.googleapis.com/books/v1/volumes', [
-            'q' => $query,
-            'maxResults' => min($limit, 40),
-            'key' => config('services.google_books.key'),
-        ]);
-
-        if (! $response->successful()) {
-            return [];
+        if (! $response->successful() || empty($response->json('docs'))) {
+            return ['author' => 'Unknown Author', 'description' => null];
         }
 
-        return collect($response->json('items', []))
-            ->map(function ($item) {
-                $info = $item['volumeInfo'] ?? [];
+        $doc = $response->json('docs.0', []);
+        $author = $doc['author_name'][0] ?? 'Unknown Author';
+        $description = null;
 
-                return [
-                    'title' => $info['title'] ?? 'Untitled',
-                    'author' => $info['authors'][0] ?? 'Unknown Author',
-                    'year' => isset($info['publishedDate']) ? substr($info['publishedDate'], 0, 4) : null,
-                    'genre' => $info['categories'][0] ?? 'General',
-                    'cover' => $info['imageLinks']['thumbnail'] ?? null,
-                ];
-            })
-            ->values()
-            ->toArray();
+        if (! empty($doc['key'])) {
+            $workResponse = Http::withOptions(['verify' => false])
+                ->withHeaders(['User-Agent' => 'Bookish Bookstore (contact@bookish.test)'])
+                ->get("https://openlibrary.org{$doc['key']}.json");
+
+            if ($workResponse->successful()) {
+                $desc = $workResponse->json('description');
+                $description = is_array($desc) ? ($desc['value'] ?? null) : $desc;
+            }
+        }
+
+        return ['author' => $author, 'description' => $description];
     });
-    }
+
+    return [
+        'id' => $book->id,
+        'title' => $book->title,
+        'price' => $book->price,
+        'stock' => $book->stock,
+        'cover_url' => $book->cover_url,
+        'author' => $info['author'],
+        'description' => $info['description'],
+    ];
+}
 }

@@ -36,7 +36,7 @@ return [
     ],
 
     'google_books' => [
-    'key' => env('GOOGLE_BOOKS_API_KEY'),
+    'key' => env('AIzaSyBYIy4B8apvUd2bHMRFEXbhWL9J_BNtmN0'),
     ],
 
 ];

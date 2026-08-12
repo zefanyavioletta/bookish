@@ -6,10 +6,10 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
         <div className="min-h-screen flex flex-col bg-white">
             <header className="bg-bookish-maroon">
                 <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
-                    <Link href="/" className="font-display font-bold text-white text-xl tracking-wide">
-                        BOOKISH
+                    <Link href="/" className="font-display font-bold text-white text-3xl tracking-wide">
+                        Bookish
                     </Link>
-                    <div className="flex gap-6 text-sm text-white/90 font-medium">
+                    <div className="flex gap-6 text-md text-white/90 font-medium">
                         <Link href="/" className="hover:text-bookish-pink-soft transition">Beranda</Link>
                         <Link href="/catalog" className="hover:text-bookish-pink-soft transition">Katalog</Link>
                         <Link href="/contact" className="hover:text-bookish-pink-soft transition">Kontak</Link>

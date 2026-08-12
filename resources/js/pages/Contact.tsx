@@ -1,10 +1,9 @@
 import SiteLayout from '@/components/SiteLayout';
 
 export default function Contact() {
-
     return (
         <SiteLayout>
-            <section className="relative overflow-hidden">
+            <section className="relative overflow-hidden min-h-[calc(100vh-80px)] flex items-center justify-center">
                 <img
                     src="/images/hero-books.jpg"
                     alt="Rak buku Bookish"
@@ -12,7 +11,7 @@ export default function Contact() {
                 />
                 <div className="absolute inset-0 bg-bookish-maroon/70" />
 
-                <div className="relative px-6 md:px-16 py-20 md:py-28">
+                <div className="relative w-full px-6 md:px-16 py-20 md:py-28">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         <div>
                             <h1 className="font-display font-bold text-white text-4xl md:text-5xl mb-6">
@@ -39,10 +38,6 @@ export default function Contact() {
                             </div>
                         </div>
                     </div>
-
-                    <span className="font-display font-bold text-white text-3xl block mt-16">
-                        BOOKISH
-                    </span>
                 </div>
             </section>
         </SiteLayout>
