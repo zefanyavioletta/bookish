@@ -1,9 +1,7 @@
 # Bookish
-
 A simple company website for a bookstore called Bookish.
 
 ## What this project uses
-
 - **Laravel**: handles the backend (PHP). It takes requests, talks to the database, and sends data to the page.
 - **React**: handles what you see on screen (the buttons, text, layout).
 - **Inertia.js**: connects Laravel and React together, so they can work as one app.
@@ -12,7 +10,6 @@ A simple company website for a bookstore called Bookish.
 - **Tailwind CSS**: used to style the site (colors, spacing, fonts).
 
 ## How the book data works
-
 For every book, some info comes from our own database, and some comes from an outside source.
 
 **From our database (MySQL):**
