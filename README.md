@@ -53,11 +53,11 @@ Some files are only there to help while building and testing on my own computer,
 - `resources/js/` and `resources/css/`
 The source code for the frontend. Locally, this gets used directly. On the live site, this code has already been turned into the `public/build/` folder by running `npm run build`, so the live site only needs that finished result.
 - `tests/`
-Automated test files. These check that the code works, but the live site doesn't need them to actually run.
+Automated test files.
 - `database/database.sqlite`
-The local database file. This only exists on our computer. The live site uses a separate real MySQL database instead.
+The local database file (sqlite) only exists on our computer. The live site uses a separate MySQL database.
 - `database/seeders/BookSeeder.php`
-this fills your local database with starter book data when you run `php artisan migrate --seed`. On the live site, the same starter data was added by hand using phpMyAdmin.
+this fills our local database with book data when we run `php artisan migrate --seed`. On the live site, the same starter data was added by hand using phpMyAdmin.
 - `.git/`
 our version history for GitHub.
 
